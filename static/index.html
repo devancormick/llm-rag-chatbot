@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM RAG Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>LLM RAG Chatbot</h1>
+            <p class="subtitle">Ask questions • Upload docs • Get AI-powered answers</p>
+        </header>
+
+        <div id="leadModal" class="modal">
+            <div class="modal-content">
+                <h2>Stay in touch</h2>
+                <p>Enter your details to start chatting</p>
+                <form id="leadForm">
+                    <input type="email" id="leadEmail" placeholder="Email *" required>
+                    <input type="text" id="leadName" placeholder="Name">
+                    <input type="text" id="leadCompany" placeholder="Company">
+                    <button type="submit">Start Chat</button>
+                </form>
+            </div>
+        </div>
+
+        <main class="chat-container">
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="chat-input-wrapper">
+                <textarea id="chatInput" placeholder="Ask a question..." rows="1"></textarea>
+                <button id="sendBtn">Send</button>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <span>Powered by RAG + LLM</span>
+        </footer>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>
