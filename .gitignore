@@ -1,0 +1,15 @@
+__pycache__
+*.py[cod]
+*$py.class
+.env
+.env.local
+venv
+.venv
+node_modules
+*.log
+.DS_Store
+chroma_db
+*.db
+data
+jd.md
+plan.md
