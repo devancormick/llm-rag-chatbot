@@ -24,9 +24,10 @@ app = FastAPI(
     version="1.0.0",
 )
 
-config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 config.DATA_DIR.mkdir(parents=True, exist_ok=True)
+config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 config.LEADS_DIR.mkdir(parents=True, exist_ok=True)
+config.TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
 vector_store = create_vector_store()
 ingestion_pipeline = IngestionPipeline()
@@ -158,7 +159,8 @@ async def upload_document(file: UploadFile = File(...)):
             detail=f"File too large. Maximum size is {_MAX_UPLOAD_BYTES // (1024 * 1024)} MB.",
         )
     doc_id = str(uuid.uuid4())
-    upload_path = config.UPLOAD_DIR / f"{doc_id}{suffix}"
+    # Save to temp dir under data/ so project root stays clean; remove after processing.
+    upload_path = config.TEMP_DIR / f"{doc_id}{suffix}"
     upload_path.write_bytes(content)
 
     try:
@@ -172,6 +174,8 @@ async def upload_document(file: UploadFile = File(...)):
     except Exception as e:
         upload_path.unlink(missing_ok=True)
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        upload_path.unlink(missing_ok=True)
 
 
 @app.get("/documents")
@@ -189,6 +193,7 @@ async def delete_document(document_id: str):
         vector_store.delete_by_document_id(document_id)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    for path in config.UPLOAD_DIR.glob(f"{document_id}.*"):
-        path.unlink(missing_ok=True)
+    for base in (config.UPLOAD_DIR, config.TEMP_DIR):
+        for path in base.glob(f"{document_id}.*"):
+            path.unlink(missing_ok=True)
     return {"status": "deleted", "document_id": document_id}

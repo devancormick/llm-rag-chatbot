@@ -10,11 +10,17 @@ except ImportError:
     pass
 
 BASE_DIR = Path(__file__).resolve().parent
-_data_dir = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data")))
-DATA_DIR = _data_dir
-UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", str(DATA_DIR / "uploads")))
-CHROMA_DIR = Path(os.getenv("CHROMA_DIR", str(DATA_DIR / "chroma_db")))
-LEADS_DIR = Path(os.getenv("LEADS_DIR", str(DATA_DIR / "leads")))
+
+# All uploads, DBs, and temp files go under DATA_DIR (default: project/data/) so the project root stays clean.
+_data_dir = os.getenv("DATA_DIR", "").strip()
+DATA_DIR = Path(_data_dir) if _data_dir else (BASE_DIR / "data")
+_upload_dir = os.getenv("UPLOAD_DIR", "").strip()
+UPLOAD_DIR = Path(_upload_dir) if _upload_dir else (DATA_DIR / "uploads")
+_chroma_dir = os.getenv("CHROMA_DIR", "").strip()
+CHROMA_DIR = Path(_chroma_dir) if _chroma_dir else (DATA_DIR / "chroma_db")
+_leads_dir = os.getenv("LEADS_DIR", "").strip()
+LEADS_DIR = Path(_leads_dir) if _leads_dir else (DATA_DIR / "leads")
+TEMP_DIR = DATA_DIR / "tmp"
 
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1000"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "200"))

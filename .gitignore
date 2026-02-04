@@ -9,7 +9,12 @@ node_modules
 *.log
 .DS_Store
 chroma_db
+chroma.sqlite3
 *.db
 data
+uploads
+vector_documents.json
+leads.json
+**/nul
 jd.md
 plan.md
