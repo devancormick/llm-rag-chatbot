@@ -1,11 +1,25 @@
 const LEAD_KEY = 'llm_rag_chatbot_lead';
 var _apiBasePromise = null;
 
+function getAppBaseFromScript() {
+    var scripts = document.getElementsByTagName('script');
+    for (var i = 0; i < scripts.length; i++) {
+        var src = scripts[i].src;
+        if (src && src.indexOf('app.js') !== -1) {
+            return src.replace(/\/static\/app\.js.*$/i, '').replace(/\/$/, '');
+        }
+    }
+    return null;
+}
+
 function getApiBase() {
     if (_apiBasePromise) return _apiBasePromise;
-    var origin = window.location.origin;
-    var path = (window.location.pathname || '').replace(/\/$/, '') || '';
-    var appBase = origin + path;
+    var appBase = getAppBaseFromScript();
+    if (!appBase) {
+        var origin = window.location.origin;
+        var path = (window.location.pathname || '').replace(/\/$/, '') || '';
+        appBase = origin + path;
+    }
     var params = new URLSearchParams(window.location.search);
     var fromQuery = params.get('baseUrl') || params.get('api');
     if (fromQuery) {
