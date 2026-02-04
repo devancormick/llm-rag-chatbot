@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = 'https://devancormick.github.io/llm-rag-chatbot';
 const LEAD_KEY = 'llm_rag_chatbot_lead';
 
 function getStoredLead() {
