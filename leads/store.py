@@ -36,7 +36,7 @@ class LeadStore:
         leads = self._load_leads()
         lead_id = str(uuid.uuid4())
 
-        existing = next((l for l in leads if l.get("email", "").lower() == email.lower()), None)
+        existing = next((lead for lead in leads if lead.get("email", "").lower() == email.lower()), None)
         if existing:
             return existing["id"]
 
@@ -61,5 +61,5 @@ class LeadStore:
         if not leads:
             return "email,name,company,created_at\n"
         headers = ["email", "name", "company", "created_at"]
-        lines = [",".join(str(l.get(h, "")) for h in headers) for l in leads]
+        lines = [",".join(str(lead.get(h, "")) for h in headers) for lead in leads]
         return "email,name,company,created_at\n" + "\n".join(lines)

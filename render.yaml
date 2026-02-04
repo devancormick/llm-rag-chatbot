@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: llm-rag-chatbot
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: VECTOR_PROVIDER
+        value: chroma
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: LOG_LEVEL
+        value: INFO

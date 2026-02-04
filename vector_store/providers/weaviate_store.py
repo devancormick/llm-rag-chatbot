@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import uuid
+from urllib.parse import urlparse
 from typing import List, Optional
 
 import config

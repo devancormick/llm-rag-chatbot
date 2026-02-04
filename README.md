@@ -109,6 +109,33 @@ Copy `.env.example` to `.env` and adjust if needed.
 
 Switch providers by updating `.env` and restarting `run.py`. Use `/vector/health` to verify connectivity.
 
+## Deployment
+
+### GitHub Actions
+
+- **CI** (`.github/workflows/ci.yml`): Runs on every push and PR to `main`. Tests on Python 3.10–3.12 and runs Ruff lint.
+- **Deploy** (`.github/workflows/deploy.yml`): On push to `main`, builds a Docker image and pushes it to [GitHub Container Registry](https://github.com/devancormick/llm-rag-chatbot/pkgs/container/llm-rag-chatbot). If `RENDER_DEPLOY_HOOK` is set in repo **Settings → Secrets and variables → Actions**, the workflow triggers a Render deploy.
+
+### Docker
+
+```bash
+docker build -t llm-rag-chatbot .
+docker run -p 8000:8000 -e VECTOR_PROVIDER=chroma llm-rag-chatbot
+```
+
+For production, set env vars (e.g. `OLLAMA_BASE_URL` if using a remote LLM, or `PINECONE_API_KEY` for Pinecone).
+
+### Render
+
+1. Connect [Render](https://render.com) to this repo.
+2. Use **Blueprint** and add `render.yaml`, or create a **Web Service** with **Docker** and this repo.
+3. Set env vars in the Render dashboard (e.g. `VECTOR_PROVIDER`, `OLLAMA_BASE_URL` for a hosted Ollama).
+4. Optional: In GitHub **Settings → Secrets**, add `RENDER_DEPLOY_HOOK` with your Render service’s deploy hook URL so every push to `main` triggers a deploy.
+
+### Other platforms
+
+- **Railway / Fly.io / Cloud Run**: Use the same Dockerfile; point the service at this repo or at the image `ghcr.io/devancormick/llm-rag-chatbot:latest` after the deploy workflow has run.
+
 ## Tech Stack
 
 - Python, FastAPI, Chroma/Qdrant/Pinecone/Milvus/FAISS/pgvector/Weaviate, sentence-transformers, Ollama
