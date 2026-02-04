@@ -67,7 +67,14 @@ class RAGChain:
             answer = response["response"].strip()
         except Exception as e:
             logger.error("LLM generation failed: %s", e)
-            answer = "Sorry, I encountered an error. Please ensure Ollama is running (ollama serve)."
+            # When Ollama is down, still show relevant context so the user gets value
+            snippet = (results[0].content[:500] + "…") if results and len(results[0].content) > 500 else (results[0].content if results else "")
+            answer = (
+                "Ollama isn’t running, so I can’t generate a full answer. Start it with: **ollama serve** (and run **ollama pull "
+                + config.OLLAMA_MODEL
+                + "** if needed).\n\nHere’s relevant text from your documents:\n\n"
+                + snippet
+            )
 
         sources = [
             {"source": r.metadata.get("source"), "page": r.metadata.get("page")}

@@ -19,8 +19,8 @@ LEADS_DIR = Path(os.getenv("LEADS_DIR", str(DATA_DIR / "leads")))
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", "1000"))
 CHUNK_OVERLAP = int(os.getenv("CHUNK_OVERLAP", "200"))
 
-TOP_K_CHUNKS = int(os.getenv("TOP_K_CHUNKS", "5"))
-SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.7"))
+TOP_K_CHUNKS = int(os.getenv("TOP_K_CHUNKS", "8"))
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.5"))
 
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3:8b")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")

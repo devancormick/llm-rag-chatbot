@@ -163,18 +163,91 @@ body {
     color: var(--text-muted);
 }
 
+.chat-input-panel {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.chat-input-panel .chat-input-wrapper.drop-over {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+}
+
+.attachment-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem 0;
+}
+
+.attachment-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.35rem 0.5rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.attachment-chip small {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+}
+
+.chip-remove {
+    margin-left: 0.25rem;
+    padding: 0 0.35rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 1;
+    border-radius: 4px;
+}
+
+.chip-remove:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .chat-input-wrapper {
     display: flex;
     gap: 0.5rem;
     align-items: flex-end;
-    border: 1px solid var(--border);
+    border: 1px solid transparent;
     border-radius: 12px;
     padding: 0.5rem;
-    background: var(--bg-secondary);
+    background: transparent;
+}
+
+.attach-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.attach-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
 }
 
 .chat-input-wrapper textarea {
     flex: 1;
+    min-width: 0;
     padding: 0.75rem;
     border: none;
     background: transparent;

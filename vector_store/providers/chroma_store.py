@@ -92,11 +92,15 @@ class ChromaVectorStore(VectorStore):
                 if distances
                 else [0.0] * len(results["documents"][0])
             )
-            for doc, meta, dist in zip(
-                results["documents"][0],
-                results["metadatas"][0],
-                dist_list,
-            ):
+            # Build (doc, meta, dist) and sort by distance (closest first)
+            candidates = list(
+                zip(
+                    results["documents"][0],
+                    results["metadatas"][0],
+                    dist_list,
+                )
+            )
+            for doc, meta, dist in candidates:
                 similarity = 1 - (dist / 2.0) if dist <= 2 else 0
                 if similarity >= threshold:
                     search_results.append(
@@ -104,6 +108,13 @@ class ChromaVectorStore(VectorStore):
                     )
                     if len(search_results) >= top_k:
                         break
+            # If threshold filtered everything out, still return top_k closest
+            # so the LLM gets context and can answer (or say "not in context")
+            if not search_results and candidates:
+                for doc, meta, dist in candidates[:top_k]:
+                    search_results.append(
+                        SearchResult(content=doc, metadata=meta, distance=dist)
+                    )
         return search_results
 
     def delete_by_document_id(self, document_id: str) -> None:
