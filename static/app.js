@@ -4,16 +4,18 @@ var _apiBasePromise = null;
 function getApiBase() {
     if (_apiBasePromise) return _apiBasePromise;
     var origin = window.location.origin;
+    var path = (window.location.pathname || '').replace(/\/$/, '') || '';
+    var appBase = origin + path;
     var params = new URLSearchParams(window.location.search);
     var fromQuery = params.get('baseUrl') || params.get('api');
     if (fromQuery) {
         _apiBasePromise = Promise.resolve(fromQuery.replace(/\/$/, ''));
         return _apiBasePromise;
     }
-    _apiBasePromise = fetch(origin + '/config')
+    _apiBasePromise = fetch(appBase + '/config')
         .then(function (r) { return r.json(); })
-        .then(function (d) { return (d.baseUrl || origin).replace(/\/$/, ''); })
-        .catch(function () { return origin; });
+        .then(function (d) { return (d.baseUrl || appBase).replace(/\/$/, ''); })
+        .catch(function () { return appBase; });
     return _apiBasePromise;
 }
 
