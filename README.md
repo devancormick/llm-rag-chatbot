@@ -116,7 +116,7 @@ Switch providers by updating `.env` and restarting `run.py`. Use `/vector/health
 
 - **CI** (`.github/workflows/ci.yml`): Runs on every push and PR to `main`. Tests on Python 3.10–3.12, Ruff lint, smoke test (app + `/config` with `BASE_URL` = [GitHub Pages URL](https://devancormick.github.io/llm-rag-chatbot)), and **smoke-ollama** (installs Ollama, pulls `tinyllama`, starts app, tests `/chat`).
 - **Deploy** (`.github/workflows/deploy.yml`): On push to `main`, builds a Docker image and pushes it to [GitHub Container Registry](https://github.com/devancormick/llm-rag-chatbot/pkgs/container/llm-rag-chatbot). If `RENDER_DEPLOY_HOOK` is set in repo **Settings → Secrets and variables → Actions**, the workflow triggers a Render deploy.
-- **GitHub Pages** (`.github/workflows/pages.yml`): Deploys the static UI to [https://devancormick.github.io/llm-rag-chatbot](https://devancormick.github.io/llm-rag-chatbot). To use a backend (e.g. Render), open the site with `?baseUrl=YOUR_API_URL` (e.g. `?baseUrl=https://llm-rag-chatbot.onrender.com`).
+- **GitHub Pages** (`.github/workflows/pages.yml`): Deploys the static UI to [https://devancormick.github.io/llm-rag-chatbot](https://devancormick.github.io/llm-rag-chatbot). Set repo **Settings → Pages → Source** to **GitHub Actions** so the chat UI (index.html) is served. To use a backend (e.g. Render), open the site with `?baseUrl=YOUR_API_URL` (e.g. `?baseUrl=https://llm-rag-chatbot.onrender.com`).
 
 ### Docker
 

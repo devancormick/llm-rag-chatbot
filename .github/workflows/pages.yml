@@ -1,5 +1,6 @@
 # Deploy static UI to GitHub Pages: https://devancormick.github.io/llm-rag-chatbot
-# Visitors must add ?baseUrl=YOUR_API_URL (e.g. Render) to use the backend.
+# In repo Settings → Pages → Source, set to "GitHub Actions" so this workflow serves the site.
+# Visitors add ?baseUrl=YOUR_API_URL (e.g. Render) to connect to the backend.
 name: GitHub Pages
 
 on:
@@ -32,6 +33,7 @@ jobs:
           cp static/index.html deploy/
           cp static/style.css deploy/static/
           cp static/app.js deploy/static/
+          touch deploy/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
