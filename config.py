@@ -111,3 +111,7 @@ MILVUS_SEARCH_PARAMS = _json_env("MILVUS_SEARCH_PARAMS", {"nprobe": 16})
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 API_HOST = os.getenv("API_HOST", "0.0.0.0")
 API_PORT = int(os.getenv("API_PORT", "8000"))
+
+# Public base URL for the frontend (API + static). Empty = same origin (e.g. localhost).
+# Set to e.g. https://yourname.github.io/llm-rag-chatbot when hosting static on GitHub Pages.
+BASE_URL = (os.getenv("BASE_URL") or "").rstrip("/")

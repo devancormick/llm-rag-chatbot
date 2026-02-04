@@ -75,6 +75,7 @@ Copy `.env.example` to `.env` and adjust if needed.
 | CHUNK_SIZE | 1000 | Chunk size for documents |
 | TOP_K_CHUNKS | 5 | Retrieval count |
 | API_PORT | 8000 | Server port |
+| BASE_URL | *(empty)* | Public base URL for frontend API calls. Empty = same origin (e.g. `http://localhost:8000`). Set e.g. `https://yourname.github.io/llm-rag-chatbot` when hosting static on GitHub Pages. Or use `?baseUrl=...` or `?api=...` in the page URL. |
 
 ### Provider-specific settings
 

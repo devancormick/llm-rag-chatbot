@@ -1,8 +1,9 @@
 import uuid
 import logging
 from pathlib import Path
+from typing import Optional
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, Request, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -14,6 +15,8 @@ from rag.chain import RAGChain
 from leads.store import LeadStore
 
 logging.basicConfig(level=getattr(logging, config.LOG_LEVEL))
+# Silence ChromaDB telemetry errors (posthog API mismatch in some versions)
+logging.getLogger("chromadb.telemetry.product.posthog").setLevel(logging.CRITICAL)
 
 app = FastAPI(
     title="LLM RAG Chatbot",
@@ -47,8 +50,8 @@ class QueryResponse(BaseModel):
 
 class LeadRequest(BaseModel):
     email: str
-    name: str | None = None
-    company: str | None = None
+    name: Optional[str] = None
+    company: Optional[str] = None
 
 
 @app.get("/")
@@ -58,6 +61,13 @@ async def root():
     if index_path.exists():
         return FileResponse(index_path)
     return {"message": "LLM RAG Chatbot API", "docs": "/docs"}
+
+
+@app.get("/config")
+async def get_config(request: Request):
+    """Frontend config: base URL for API calls (from env). Empty = use same origin."""
+    base_url = config.BASE_URL or str(request.base_url).rstrip("/")
+    return {"baseUrl": base_url}
 
 
 @app.get("/health")
@@ -140,9 +150,15 @@ async def upload_document(file: UploadFile = File(...)):
             detail="Unsupported format. Use PDF or Markdown.",
         )
 
+    _MAX_UPLOAD_BYTES = 20 * 1024 * 1024  # 20 MB
+    content = await file.read()
+    if len(content) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"File too large. Maximum size is {_MAX_UPLOAD_BYTES // (1024 * 1024)} MB.",
+        )
     doc_id = str(uuid.uuid4())
     upload_path = config.UPLOAD_DIR / f"{doc_id}{suffix}"
-    content = await file.read()
     upload_path.write_bytes(content)
 
     try:
@@ -166,7 +182,13 @@ async def list_documents():
 
 @app.delete("/documents/{document_id}")
 async def delete_document(document_id: str):
-    vector_store.delete_by_document_id(document_id)
+    doc_ids = vector_store.list_documents()
+    if document_id not in doc_ids:
+        raise HTTPException(status_code=404, detail="Document not found")
+    try:
+        vector_store.delete_by_document_id(document_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
     for path in config.UPLOAD_DIR.glob(f"{document_id}.*"):
         path.unlink(missing_ok=True)
     return {"status": "deleted", "document_id": document_id}

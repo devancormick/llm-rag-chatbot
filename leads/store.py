@@ -1,3 +1,5 @@
+import csv
+import io
 import json
 import uuid
 from datetime import datetime
@@ -56,10 +58,14 @@ class LeadStore:
         return self._load_leads()
 
     def export_csv(self) -> str:
-        """Export leads as CSV string."""
+        """Export leads as CSV string (RFC 4180: quoted fields for commas/newlines)."""
         leads = self._load_leads()
         if not leads:
             return "email,name,company,created_at\n"
         headers = ["email", "name", "company", "created_at"]
-        lines = [",".join(str(lead.get(h, "")) for h in headers) for lead in leads]
-        return "email,name,company,created_at\n" + "\n".join(lines)
+        out = io.StringIO()
+        writer = csv.writer(out, quoting=csv.QUOTE_MINIMAL)
+        writer.writerow(headers)
+        for lead in leads:
+            writer.writerow([str(lead.get(h, "")) for h in headers])
+        return out.getvalue()

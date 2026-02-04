@@ -1,5 +1,21 @@
-const API_BASE = 'https://devancormick.github.io/llm-rag-chatbot';
 const LEAD_KEY = 'llm_rag_chatbot_lead';
+var _apiBasePromise = null;
+
+function getApiBase() {
+    if (_apiBasePromise) return _apiBasePromise;
+    var origin = window.location.origin;
+    var params = new URLSearchParams(window.location.search);
+    var fromQuery = params.get('baseUrl') || params.get('api');
+    if (fromQuery) {
+        _apiBasePromise = Promise.resolve(fromQuery.replace(/\/$/, ''));
+        return _apiBasePromise;
+    }
+    _apiBasePromise = fetch(origin + '/config')
+        .then(function (r) { return r.json(); })
+        .then(function (d) { return (d.baseUrl || origin).replace(/\/$/, ''); })
+        .catch(function () { return origin; });
+    return _apiBasePromise;
+}
 
 function getStoredLead() {
     try {
@@ -21,8 +37,8 @@ function hideLeadModal() {
     document.getElementById('leadModal').classList.remove('active');
 }
 
-async function registerLead(email, name, company) {
-    const res = await fetch(`${API_BASE}/leads`, {
+async function registerLead(apiBase, email, name, company) {
+    const res = await fetch(apiBase + '/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, name: name || null, company: company || null }),
@@ -33,12 +49,13 @@ async function registerLead(email, name, company) {
 
 document.getElementById('leadForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    var apiBase = await getApiBase();
     const email = document.getElementById('leadEmail').value.trim();
     const name = document.getElementById('leadName').value.trim();
     const company = document.getElementById('leadCompany').value.trim();
 
     try {
-        const data = await registerLead(email, name, company);
+        const data = await registerLead(apiBase, email, name, company);
         setStoredLead({ email, name, company, id: data.lead_id });
         hideLeadModal();
     } catch (err) {
@@ -46,16 +63,23 @@ document.getElementById('leadForm').addEventListener('submit', async (e) => {
     }
 });
 
+function escapeHtml(s) {
+    if (s == null) return '';
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+}
+
 function addMessage(text, role, sources = []) {
     const container = document.getElementById('chatMessages');
     const div = document.createElement('div');
-    div.className = `message ${role}`;
+    div.className = 'message ' + escapeHtml(role);
 
-    let html = text.replace(/\n/g, '<br>');
+    var safe = escapeHtml(text).replace(/\n/g, '<br>');
     if (sources && sources.length > 0) {
-        html += '<div class="sources">Sources: ' + sources.map(s => s.source || 'N/A').join(', ') + '</div>';
+        safe += '<div class="sources">Sources: ' + sources.map(function (s) { return escapeHtml(s.source || 'N/A'); }).join(', ') + '</div>';
     }
-    div.innerHTML = html;
+    div.innerHTML = safe;
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
 }
@@ -70,8 +94,9 @@ async function sendMessage() {
     input.value = '';
     btn.disabled = true;
 
+    var apiBase = await getApiBase();
     try {
-        const res = await fetch(`${API_BASE}/chat`, {
+        const res = await fetch(apiBase + '/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ question: text, top_k: 5 }),
@@ -96,8 +121,10 @@ document.getElementById('chatInput').addEventListener('keydown', (e) => {
     }
 });
 
-if (!getStoredLead()) {
-    showLeadModal();
-} else {
-    addMessage('Hi! How can I help you today?', 'bot');
-}
+getApiBase().then(function () {
+    if (!getStoredLead()) {
+        showLeadModal();
+    } else {
+        addMessage('Hi! How can I help you today?', 'bot');
+    }
+});

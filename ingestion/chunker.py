@@ -20,8 +20,8 @@ class TextChunker:
         chunk_size: int = config.CHUNK_SIZE,
         chunk_overlap: int = config.CHUNK_OVERLAP,
     ):
-        self.chunk_size = chunk_size
-        self.chunk_overlap = chunk_overlap
+        self.chunk_size = max(1, chunk_size)
+        self.chunk_overlap = min(max(0, chunk_overlap), self.chunk_size - 1)
 
     def chunk_documents(self, documents: List[DocumentChunk]) -> List[TextChunk]:
         """Split documents into overlapping text chunks."""
