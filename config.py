@@ -5,6 +5,7 @@ from pathlib import Path
 try:
     from dotenv import load_dotenv
     load_dotenv()
+    load_dotenv(".env.local")  # local overrides for local run (gitignored)
 except ImportError:
     pass
 
