@@ -1,53 +1,31 @@
+from __future__ import annotations
+
 from pathlib import Path
 from typing import List, Optional
-from dataclasses import dataclass
 
 import chromadb
 from chromadb.config import Settings
 
 import config
 from ingestion.chunker import TextChunk
+from vector_store.base import SearchResult, VectorStore
+from vector_store.embeddings import get_embedding_function
 
 
-@dataclass
-class SearchResult:
-    content: str
-    metadata: dict
-    distance: float
-
-
-def _get_embedding_function():
-    if config.EMBEDDING_PROVIDER == "openai" and config.OPENAI_API_KEY:
-        from openai import OpenAI
-
-        client = OpenAI(api_key=config.OPENAI_API_KEY)
-        model = config.OPENAI_EMBEDDING_MODEL
-
-        def embed(texts: List[str]) -> List[List[float]]:
-            resp = client.embeddings.create(input=texts, model=model)
-            return [e.embedding for e in resp.data]
-
-        return embed
-    else:
-        from sentence_transformers import SentenceTransformer
-
-        model = SentenceTransformer(config.EMBEDDING_MODEL)
-
-        def embed(texts: List[str]) -> List[List[float]]:
-            return model.encode(texts).tolist()
-
-        return embed
-
-
-class VectorStore:
-    """Vector store for document embeddings using ChromaDB."""
+class ChromaVectorStore(VectorStore):
+    """Vector store backed by ChromaDB."""
 
     COLLECTION_NAME = "chatbot_docs"
 
-    def __init__(self, persist_directory: Optional[Path] = None):
+    def __init__(
+        self,
+        persist_directory: Optional[Path] = None,
+        tracker=None,
+    ):
+        super().__init__(tracker=tracker)
         self.persist_dir = persist_directory or config.CHROMA_DIR
         self.persist_dir.mkdir(parents=True, exist_ok=True)
-        self._embed_fn = _get_embedding_function()
+        self._embed_fn = get_embedding_function()
 
         self.client = chromadb.PersistentClient(
             path=str(self.persist_dir),
@@ -71,7 +49,8 @@ class VectorStore:
 
         contents = [c.content for c in chunks]
         metadatas = [
-            {**c.metadata, "document_id": document_id or "unknown"} for c in chunks
+            {**c.metadata, "document_id": document_id or "unknown"}
+            for c in chunks
         ]
         embeddings = self._embed(contents)
         ids = [f"chunk_{i}_{hash(c.content) % 10**8}" for i, c in enumerate(chunks)]
@@ -82,6 +61,9 @@ class VectorStore:
             documents=contents,
             metadatas=metadatas,
         )
+
+        if document_id:
+            self._track_add(document_id)
         return len(chunks)
 
     def search(
@@ -102,10 +84,14 @@ class VectorStore:
             else config.SIMILARITY_THRESHOLD
         )
 
-        search_results = []
+        search_results: List[SearchResult] = []
         if results["documents"] and results["documents"][0]:
             distances = results.get("distances")
-            dist_list = distances[0] if distances else [0.0] * len(results["documents"][0])
+            dist_list = (
+                distances[0]
+                if distances
+                else [0.0] * len(results["documents"][0])
+            )
             for doc, meta, dist in zip(
                 results["documents"][0],
                 results["metadatas"][0],
@@ -127,11 +113,4 @@ class VectorStore:
         )
         if results["ids"]:
             self.collection.delete(ids=results["ids"])
-
-    def list_documents(self) -> List[str]:
-        results = self.collection.get(include=["metadatas"])
-        doc_ids = set()
-        for meta in results.get("metadatas", []):
-            if meta and "document_id" in meta:
-                doc_ids.add(meta["document_id"])
-        return sorted(doc_ids)
+        self._track_remove(document_id)

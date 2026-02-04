@@ -8,3 +8,7 @@ ollama==0.1.6
 httpx>=0.25.2,<0.26.0
 sentence-transformers>=2.7.0
 openai>=1.0.0
+pinecone-client>=2.2.2
+qdrant-client>=1.7.3
+pymilvus>=2.3.4
+faiss-cpu>=1.7.4

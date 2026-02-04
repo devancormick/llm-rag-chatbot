@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from ollama import Client
 
 import config
-from vector_store.store import VectorStore, SearchResult
+from vector_store.base import VectorStore, SearchResult
 
 logger = logging.getLogger(__name__)
 

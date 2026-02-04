@@ -8,7 +8,7 @@ A chatbot powered by a Large Language Model (LLM) using Retrieval-Augmented Gene
 - **Lead Generation**: Capture visitor email, name, and company before chat
 - **Document Ingestion**: Upload PDF and Markdown files
 - **Streaming Responses**: Real-time answer streaming (API)
-- **NLP**: Text chunking, embeddings, semantic search via ChromaDB
+- **NLP**: Text chunking, embeddings, semantic search via pluggable vector stores (Chroma, Pinecone, Qdrant, Milvus, FAISS)
 - **Web UI**: Responsive chat interface with lead modal
 
 ## Prerequisites
@@ -52,6 +52,7 @@ Copy `.env.example` to `.env` and adjust if needed.
 |--------|----------|-------------|
 | GET | / | Chat UI |
 | GET | /health | Health check |
+| GET | /vector/health | Vector store connectivity diagnostics |
 | POST | /chat | Send message, get RAG response |
 | POST | /chat/stream | Stream response |
 | POST | /leads | Register lead |
@@ -65,16 +66,44 @@ Copy `.env.example` to `.env` and adjust if needed.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| OLLAMA_MODEL | llama3:8b | Ollama model |
+| VECTOR_PROVIDER | chroma | Choose `chroma`, `pinecone`, `qdrant`, `milvus`, or `faiss` |
+| OLLAMA_MODEL | llama3:8b | Ollama model name |
 | OLLAMA_BASE_URL | http://localhost:11434 | Ollama API URL |
-| EMBEDDING_PROVIDER | sentence_transformers | Embedding backend |
+| EMBEDDING_PROVIDER | sentence_transformers | `sentence_transformers` or `openai` |
+| EMBEDDING_MODEL | all-MiniLM-L6-v2 | SentenceTransformer model name |
+| EMBEDDING_DIMENSION | 384 | Embedding vector size |
 | CHUNK_SIZE | 1000 | Chunk size for documents |
 | TOP_K_CHUNKS | 5 | Retrieval count |
 | API_PORT | 8000 | Server port |
 
+### Provider-specific settings
+
+**Chroma (default)**
+- `CHROMA_DIR`: override persistence directory (defaults to `data/chroma_db`)
+
+**Pinecone**
+- `PINECONE_API_KEY` *(required)*
+- `PINECONE_INDEX_NAME`, `PINECONE_NAMESPACE`, `PINECONE_DIMENSION`, `PINECONE_METRIC`
+- `PINECONE_CLOUD` (aws/gcp) and `PINECONE_REGION`
+
+**Qdrant**
+- `QDRANT_URL`, `QDRANT_API_KEY`
+- `QDRANT_COLLECTION_NAME`, `QDRANT_DIMENSION`, `QDRANT_GRPC`
+
+**Milvus / Zilliz**
+- `MILVUS_URI`, `MILVUS_USER`, `MILVUS_PASSWORD`
+- `MILVUS_COLLECTION_NAME`, `MILVUS_DIMENSION`
+- `MILVUS_INDEX_TYPE`, `MILVUS_INDEX_PARAMS` (JSON), `MILVUS_SEARCH_PARAMS` (JSON)
+
+**FAISS**
+- `FAISS_INDEX_PATH`, `FAISS_METADATA_PATH`
+- `FAISS_DIMENSION`, `FAISS_NORMALIZE`
+
+Switch providers by updating `.env` and restarting `run.py`. Use `/vector/health` to verify connectivity.
+
 ## Tech Stack
 
-- Python, FastAPI, ChromaDB, sentence-transformers, Ollama
+- Python, FastAPI, Chroma/Qdrant/Pinecone/Milvus/FAISS, sentence-transformers, Ollama
 - Vanilla JavaScript, HTML5, CSS3
 
 ## License

@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 import config
 from ingestion.pipeline import IngestionPipeline
-from vector_store.store import VectorStore
+from vector_store import create_vector_store
 from rag.chain import RAGChain
 from leads.store import LeadStore
 
@@ -25,7 +25,7 @@ config.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 config.DATA_DIR.mkdir(parents=True, exist_ok=True)
 config.LEADS_DIR.mkdir(parents=True, exist_ok=True)
 
-vector_store = VectorStore()
+vector_store = create_vector_store()
 ingestion_pipeline = IngestionPipeline()
 rag_chain = RAGChain(vector_store)
 lead_store = LeadStore()
@@ -62,7 +62,23 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "vector_provider": config.VECTOR_PROVIDER,
+    }
+
+
+@app.get("/vector/health")
+async def vector_health():
+    try:
+        doc_count = len(vector_store.list_documents())
+        return {
+            "status": "ok",
+            "provider": config.VECTOR_PROVIDER,
+            "tracked_documents": doc_count,
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
 
 
 @app.post("/chat", response_model=QueryResponse)
