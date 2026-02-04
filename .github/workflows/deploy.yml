@@ -48,8 +48,37 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy-render:
+  smoke-image:
     needs: build-and-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run image smoke test
+        run: |
+          image="${{ env.REGISTRY }}/${{ github.repository_owner }}/llm-rag-chatbot:latest"
+          docker run -d --name app -e VECTOR_PROVIDER=chroma -e DATA_DIR=/tmp/data -e BASE_URL= -p 8000:8000 "$image"
+          for i in $(seq 1 15); do
+            if curl -fsS -o /dev/null -w "%{http_code}" http://localhost:8000/health 2>/dev/null | grep -q 200; then
+              break
+            fi
+            sleep 2
+          done
+          curl -fsS http://localhost:8000/health
+          curl -fsS http://localhost:8000/config | grep -q baseUrl
+          docker stop app
+          echo "Image smoke test passed"
+
+  deploy-render:
+    needs: [build-and-push, smoke-image]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
