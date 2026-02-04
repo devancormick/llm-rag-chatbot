@@ -14,7 +14,7 @@ A chatbot powered by a Large Language Model (LLM) using Retrieval-Augmented Gene
 ## Prerequisites
 
 - Python 3.10+
-- [Ollama](https://ollama.ai/) installed and running
+- **Either** [Ollama](https://ollama.ai/) installed and running locally, **or** an [Ollama Cloud](https://ollama.com) API key (set `OLLAMA_API_KEY`) to use cloud models and reduce local resource usage
 
 ## Installation
 
@@ -22,15 +22,17 @@ A chatbot powered by a Large Language Model (LLM) using Retrieval-Augmented Gene
 pip install -r requirements.txt
 ```
 
-Copy `.env.example` to `.env` and adjust if needed.
+Copy `.env.example` to `.env` and adjust if needed. Never commit `.env` (it is gitignored); put API keys only in `.env`.
 
 ## Usage
 
-1. Start Ollama:
-   ```bash
-   ollama serve
-   ollama pull llama3:8b
-   ```
+1. **LLM backend** (choose one):
+   - **Ollama Cloud** (recommended to save local resources): Create an API key at [ollama.com/settings/keys](https://ollama.com/settings/keys) and set `OLLAMA_API_KEY` in `.env`. No local Ollama needed.
+   - **Local Ollama**:
+     ```bash
+     ollama serve
+     ollama pull llama3:8b
+     ```
 
 2. Run the chatbot:
    ```bash
@@ -67,8 +69,9 @@ Copy `.env.example` to `.env` and adjust if needed.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | VECTOR_PROVIDER | chroma | Choose `chroma`, `pinecone`, `qdrant`, `milvus`, or `faiss` |
-| OLLAMA_MODEL | llama3:8b | Ollama model name |
-| OLLAMA_BASE_URL | http://localhost:11434 | Ollama API URL |
+| OLLAMA_MODEL | llama3:8b | Ollama model name (use a [cloud model](https://ollama.com/search?c=cloud) name when using `OLLAMA_API_KEY`) |
+| OLLAMA_BASE_URL | http://localhost:11434 | Ollama API URL (ignored when `OLLAMA_API_KEY` is set) |
+| OLLAMA_API_KEY | *(empty)* | If set, use [Ollama Cloud](https://ollama.com) instead of local Ollama—reduces local GPU/CPU usage. Get key at [ollama.com/settings/keys](https://ollama.com/settings/keys). |
 | EMBEDDING_PROVIDER | sentence_transformers | `sentence_transformers` or `openai` |
 | EMBEDDING_MODEL | all-MiniLM-L6-v2 | SentenceTransformer model name |
 | EMBEDDING_DIMENSION | 384 | Embedding vector size |
