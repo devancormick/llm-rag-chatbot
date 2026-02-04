@@ -65,6 +65,35 @@ class VectorFactoryTests(unittest.TestCase):
             tracker_cls.assert_called_once()
             faiss_cls.assert_called_once_with(tracker=mock.ANY)
 
+    def test_pgvector_requires_connection_string(self):
+        with mock.patch.object(config, "VECTOR_PROVIDER", "pgvector"), mock.patch.object(
+            config, "PGVECTOR_CONNECTION_STRING", ""
+        ), mock.patch.object(config, "DATABASE_URL", ""):
+            with self.assertRaises(ValueError):
+                create_vector_store()
+
+    def test_pgvector_creation(self):
+        with mock.patch.object(config, "VECTOR_PROVIDER", "pgvector"), mock.patch.object(
+            config, "PGVECTOR_CONNECTION_STRING", "postgresql://localhost/rag"
+        ), mock.patch(
+            "vector_store.factory.PgvectorVectorStore"
+        ) as pgvector_cls, mock.patch(
+            "vector_store.factory.DocumentTracker"
+        ) as tracker_cls:
+            create_vector_store()
+            tracker_cls.assert_called_once()
+            pgvector_cls.assert_called_once_with(tracker=mock.ANY)
+
+    def test_weaviate_creation(self):
+        with mock.patch.object(config, "VECTOR_PROVIDER", "weaviate"), mock.patch(
+            "vector_store.factory.WeaviateVectorStore"
+        ) as weaviate_cls, mock.patch(
+            "vector_store.factory.DocumentTracker"
+        ) as tracker_cls:
+            create_vector_store()
+            tracker_cls.assert_called_once()
+            weaviate_cls.assert_called_once_with(tracker=mock.ANY)
+
 
 if __name__ == "__main__":
     unittest.main()

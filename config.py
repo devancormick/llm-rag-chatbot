@@ -50,6 +50,30 @@ QDRANT_COLLECTION_NAME = os.getenv("QDRANT_COLLECTION_NAME", "llm_rag_docs")
 QDRANT_DIMENSION = int(os.getenv("QDRANT_DIMENSION", str(EMBEDDING_DIMENSION)))
 QDRANT_GRPC = os.getenv("QDRANT_GRPC", "false").lower() == "true"
 
+# pgvector (PostgreSQL) - free, self-hosted
+DATABASE_URL = os.getenv("DATABASE_URL", "")
+PGVECTOR_CONNECTION_STRING = os.getenv(
+    "PGVECTOR_CONNECTION_STRING", DATABASE_URL
+)
+PGVECTOR_TABLE_NAME = os.getenv("PGVECTOR_TABLE_NAME", "llm_rag_embeddings")
+PGVECTOR_DIMENSION = int(
+    os.getenv("PGVECTOR_DIMENSION", str(EMBEDDING_DIMENSION))
+)
+PGVECTOR_CREATE_EXTENSION = (
+    os.getenv("PGVECTOR_CREATE_EXTENSION", "true").lower() == "true"
+)
+
+# Weaviate - free self-hosted, hybrid search
+WEAVIATE_URL = os.getenv("WEAVIATE_URL", "http://localhost:8080")
+WEAVIATE_GRPC_PORT = int(os.getenv("WEAVIATE_GRPC_PORT", "50051"))
+WEAVIATE_API_KEY = os.getenv("WEAVIATE_API_KEY", "")
+WEAVIATE_COLLECTION_NAME = os.getenv(
+    "WEAVIATE_COLLECTION_NAME", "LlmRagChunk"
+)
+WEAVIATE_DIMENSION = int(
+    os.getenv("WEAVIATE_DIMENSION", str(EMBEDDING_DIMENSION))
+)
+
 # FAISS
 FAISS_INDEX_PATH = os.getenv(
     "FAISS_INDEX_PATH", str(DATA_DIR / "faiss" / "index.faiss")

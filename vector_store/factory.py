@@ -10,7 +10,9 @@ from vector_store.providers import (
     FaissVectorStore,
     MilvusVectorStore,
     PineconeVectorStore,
+    PgvectorVectorStore,
     QdrantVectorStore,
+    WeaviateVectorStore,
 )
 
 logger = logging.getLogger(__name__)
@@ -38,6 +40,20 @@ def create_vector_store() -> VectorStore:
     if provider == "faiss":
         logger.info("Using FAISS vector store (local)")
         return FaissVectorStore(tracker=tracker)
+
+    if provider == "pgvector":
+        if not getattr(config, "PGVECTOR_CONNECTION_STRING", "") and not getattr(
+            config, "DATABASE_URL", ""
+        ):
+            raise ValueError(
+                "PGVECTOR_CONNECTION_STRING or DATABASE_URL is required for pgvector."
+            )
+        logger.info("Using pgvector (PostgreSQL)")
+        return PgvectorVectorStore(tracker=tracker)
+
+    if provider == "weaviate":
+        logger.info("Using Weaviate vector store at %s", config.WEAVIATE_URL)
+        return WeaviateVectorStore(tracker=tracker)
 
     # Default to Chroma
     logger.info("Using Chroma vector store (local)")

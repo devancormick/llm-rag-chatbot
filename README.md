@@ -8,7 +8,7 @@ A chatbot powered by a Large Language Model (LLM) using Retrieval-Augmented Gene
 - **Lead Generation**: Capture visitor email, name, and company before chat
 - **Document Ingestion**: Upload PDF and Markdown files
 - **Streaming Responses**: Real-time answer streaming (API)
-- **NLP**: Text chunking, embeddings, semantic search via pluggable vector stores (Chroma, Pinecone, Qdrant, Milvus, FAISS)
+- **NLP**: Text chunking, embeddings, semantic search via pluggable vector stores (Chroma, Pinecone, Qdrant, Milvus, FAISS, pgvector, Weaviate)
 - **Web UI**: Responsive chat interface with lead modal
 
 ## Prerequisites
@@ -95,6 +95,14 @@ Copy `.env.example` to `.env` and adjust if needed.
 - `MILVUS_COLLECTION_NAME`, `MILVUS_DIMENSION`
 - `MILVUS_INDEX_TYPE`, `MILVUS_INDEX_PARAMS` (JSON), `MILVUS_SEARCH_PARAMS` (JSON)
 
+**pgvector (PostgreSQL)** – free, self-hosted; good for existing Postgres apps
+- `PGVECTOR_CONNECTION_STRING` or `DATABASE_URL` *(required)*
+- `PGVECTOR_TABLE_NAME`, `PGVECTOR_DIMENSION`, `PGVECTOR_CREATE_EXTENSION`
+
+**Weaviate** – free self-hosted; vector + keyword + filters
+- `WEAVIATE_URL`, `WEAVIATE_GRPC_PORT`, `WEAVIATE_API_KEY`
+- `WEAVIATE_COLLECTION_NAME`, `WEAVIATE_DIMENSION`
+
 **FAISS**
 - `FAISS_INDEX_PATH`, `FAISS_METADATA_PATH`
 - `FAISS_DIMENSION`, `FAISS_NORMALIZE`
@@ -103,7 +111,7 @@ Switch providers by updating `.env` and restarting `run.py`. Use `/vector/health
 
 ## Tech Stack
 
-- Python, FastAPI, Chroma/Qdrant/Pinecone/Milvus/FAISS, sentence-transformers, Ollama
+- Python, FastAPI, Chroma/Qdrant/Pinecone/Milvus/FAISS/pgvector/Weaviate, sentence-transformers, Ollama
 - Vanilla JavaScript, HTML5, CSS3
 
 ## License
